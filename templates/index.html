@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Non-Blocking Linked List Test</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { text-align: center; }
+        form { margin-bottom: 20px; }
+        input[type="number"] { width: 100px; }
+        #results, #visualization { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Non-Blocking Linked List Test</h1>
+    <form id="testForm">
+        <label for="num_threads">Number of Threads:</label>
+        <input type="number" id="num_threads" name="num_threads" min="1" value="4" required>
+        <label for="num_operations">Operations per Thread:</label>
+        <input type="number" id="num_operations" name="num_operations" min="1" value="1000" required>
+        <button type="submit">Run Test</button>
+    </form>
+    <div id="results"></div>
+    <div id="visualization"></div>
+    <div id="operationTimesChart"></div>
+
+    <script>
+        document.getElementById('testForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            fetch('/run_test', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('results').innerHTML = `
+                    <h2>Test Results</h2>
+                    <p>Final list contents: ${data.list_contents.join(', ')}</p>
+                `;
+                document.getElementById('visualization').innerHTML = `
+                    <h2>List Visualization</h2>
+                    <img src="/static/list_visualization.png" alt="Linked List Visualization">
+                `;
+                plotOperationTimes(data.operation_times);
+            });
+        });
+
+        function plotOperationTimes(operationTimes) {
+            const traces = Object.entries(operationTimes).map(([operation, times]) => ({
+                x: times,
+                type: 'histogram',
+                name: operation
+            }));
+
+            const layout = {
+                title: 'Operation Times Distribution',
+                xaxis: { title: 'Time (ms)' },
+                yaxis: { title: 'Frequency' },
+                barmode: 'overlay'
+            };
+
+            Plotly.newPlot('operationTimesChart', traces, layout);
+        }
+    </script>
+</body>
+</html>
