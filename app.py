@@ -144,4 +144,4 @@ def perform_operations(num_operations):
         operation_times[operation].append((end_time - start_time) * 1000)  # Convert to milliseconds
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host= '0.0.0.0')
